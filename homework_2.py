@@ -1,18 +1,37 @@
 class Person:
-    def __init__(self, name, birth_date, occupation):
+    def __init__(self, name, profession):
         self.name = name
-        self.birth_date = birth_date
-        self.occupation = occupation
+        self.profession = profession
 
+    def introduce(self):
+        print(f"Привет меня зовут {self.name}. Я работаю как {self.profession}.")
 
-person1 = Person('Влад', '1999-12-31', 'програмист')
-person2 = Person('Даша', '1986-04-26', 'инженер')
-person3 = Person('Артем', '1991-12-26', 'врачь')
 
 class Classmate(Person):
-    def introduce(self, introduce):
-        print(f"higher_education{self.higher_education} is introduce to {introduce}")
+    def __init__(self, name, subject):
+        super().__init__(name, "студент")
+        self.subject = subject
 
-class Friend:
-    def introduce(self, introduce):
-        print(f"have been friends for {self.have_been_friends_for} is introduce to {introduce}")
+    def introduce(self):
+        print(f"привет я {self.name}, твой одногруппник. мы учим {self.subject}.")
+
+
+class Friend(Person):
+    def __init__(self, name, hobby):
+        super().__init__(name, "друг")
+        self.hobby = hobby
+
+    def introduce(self):
+
+        print(f"эй я {self.name}, твой друг. мне нравится {self.hobby}.")
+
+classmate1 = Classmate('Коля', 'прогрмирования')
+classmate2 = Classmate('Мэрим', 'обществознания')
+
+friend1 = Friend('Алан', 'рисования')
+friend2 = Friend("Юджин", 'сталкерство')
+
+classmate1.introduce()
+classmate2.introduce()
+friend1.introduce()
+friend2.introduce()
