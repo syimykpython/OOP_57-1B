@@ -1,0 +1,62 @@
+import sqlite3
+
+def create_table():
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS books (
+            name TEXT,
+            author TEXT,
+            publication_year INTEGER,
+            genre TEXT,
+            number_of_pages INTEGER,
+            number_of_copies INTEGER
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+def insert_books():
+    books = [
+        ("1984", "Джордж Оруэлл", 1949, "Антиутопия", 328, 5),
+        ("Убить пересмешника", "Харпер Ли", 1960, "Художественная литература", 281, 4),
+        ("Гордость и предубеждение", "Джейн Остин", 1813, "Роман", 279, 3),
+        ("Великий Гэтсби", "Фрэнсис Скотт Фицджеральд", 1925, "Классика", 180, 2),
+        ("Моби Дик", "Герман Мелвилл", 1851, "Приключения", 635, 1),
+        ("Война и мир", "Лев Толстой", 1869, "Исторический", 1225, 2),
+        ("Хоббит", "Дж. Р. Р. Толкин", 1937, "Фэнтези", 310, 6),
+        ("О дивный новый мир", "Олдос Хаксли", 1932, "Научная фантастика", 311, 3),
+        ("Преступление и наказание", "Фёдор Достоевский", 1866, "Философский роман", 430, 2),
+        ("Джейн Эйр", "Шарлотта Бронте", 1847, "Готический роман", 500, 4)
+    ]
+
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+    cursor.executemany('''
+        INSERT INTO books (name, author, publication_year, genre, number_of_pages, number_of_copies)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', books)
+    conn.commit()
+    conn.close()
+
+def delete_book(book_name):
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM books WHERE name = ?', (book_name,))
+    conn.commit()
+    conn.close()
+
+def print_books():
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM books')
+    books = cursor.fetchall()
+    for book in books:
+        print(book)
+    conn.close()
+
+if __name__ == "__main__":
+    create_table()
+    insert_books()
+    delete_book("Moby Dick")
+    print_books()
