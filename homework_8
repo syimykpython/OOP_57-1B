@@ -1,0 +1,121 @@
+import sqlite3
+
+def create_tables():
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS genres (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE
+        )
+    ''')
+
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS books (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            author TEXT,
+            publication_year INTEGER,
+            genre_id INTEGER,
+            number_of_pages INTEGER,
+            number_of_copies INTEGER,
+            FOREIGN KEY (genre_id) REFERENCES genres(id)
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+def insert_genres():
+    genres = [
+        ("Антиутопия",),
+        ("Художественная литература",),
+        ("Роман",),
+        ("Классика",),
+        ("Приключения",),
+        ("Исторический",),
+        ("Фэнтези",),
+        ("Научная фантастика",),
+        ("Философский роман",),
+        ("Готический роман",)
+    ]
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+    cursor.executemany('INSERT OR IGNORE INTO genres (name) VALUES (?)', genres)
+    conn.commit()
+    conn.close()
+
+def get_genre_id(genre_name):
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+    cursor.execute('SELECT id FROM genres WHERE name = ?', (genre_name,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return result[0]
+    else:
+        print(f"Жанр '{genre_name}' не найден в базе.")
+        return None
+
+def insert_books():
+    books = [
+        ("1984", "Джордж Оруэлл", 1949, "Антиутопия", 328, 5),
+        ("Убить пересмешника", "Харпер Ли", 1960, "Художественная литература", 281, 4),
+        ("Гордость и предубеждение", "Джейн Остин", 1813, "Роман", 279, 3),
+        ("Великий Гэтсби", "Фрэнсис Скотт Фицджеральд", 1925, "Классика", 180, 2),
+        ("Моби Дик", "Герман Мелвилл", 1851, "Приключения", 635, 1),
+        ("Война и мир", "Лев Толстой", 1869, "Исторический", 1225, 2),
+        ("Хоббит", "Дж. Р. Р. Толкин", 1937, "Фэнтези", 310, 6),
+        ("О дивный новый мир", "Олдос Хаксли", 1932, "Научная фантастика", 311, 3),
+        ("Преступление и наказание", "Фёдор Достоевский", 1866, "Философский роман", 430, 2),
+        ("Джейн Эйр", "Шарлотта Бронте", 1847, "Готический роман", 500, 4)
+    ]
+
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+
+    for book in books:
+        genre_id = get_genre_id(book[3])
+        if genre_id is not None:
+            cursor.execute('''
+                INSERT INTO books (name, author, publication_year, genre_id, number_of_pages, number_of_copies)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (book[0], book[1], book[2], genre_id, book[4], book[5]))
+        else:
+            print(f"Пропущена книга '{book[0]}', так как жанр не найден.")
+    conn.commit()
+    conn.close()
+
+def delete_book(book_name):
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+    cursor.execute('DELETE FROM books WHERE name = ?', (book_name,))
+    if cursor.rowcount == 0:
+        print(f"Книга с названием '{book_name}' не найдена для удаления.")
+    else:
+        print(f"Книга '{book_name}' успешно удалена.")
+    conn.commit()
+    conn.close()
+
+def print_books_with_genres():
+    conn = sqlite3.connect("library.db")
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT books.name, books.author, books.publication_year, genres.name AS genre,
+               books.number_of_pages, books.number_of_copies
+        FROM books
+        JOIN genres ON books.genre_id = genres.id
+    ''')
+    books = cursor.fetchall()
+    for book in books:
+        print(book)
+    conn.close()
+
+if __name__ == "__main__":
+    create_tables()
+    insert_genres()
+    insert_books()
+    delete_book("Моби Дик")
+    print_books_with_genres()
